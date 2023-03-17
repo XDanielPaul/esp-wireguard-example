@@ -4,33 +4,6 @@ on:
   push:
     branches:
       - master
-    paths-ignore:
-      - '.github/workflows/build-artifact.yml'
-      - '.github/workflows/build-artifact-on-push.yml'
-
-# on:
-#   workflow_dispatch:
-#     inputs:
-#       path:
-#         description: "Relative path under $GITHUB_WORKSPACE to place the repository"
-#         default: ""
-#         required: false
-#       esp_idf_version:
-#         description: "Tag of ESP-IDF docker image to use"
-#         default: "release-v4.4"
-#         required: true
-#       target:
-#         description: "ESP32 variant to build for"
-#         default: "esp32"
-#         required: true
-#       command:
-#         description: "Command to run inside the docker container (default: builds the project)"
-#         default: "idf.py build"
-#         required: true
-#       sdkconfig_defaults:
-#         description: "Sdkconfig default settings"
-#         default: ""
-#         required: false
 
 jobs:
   build-and-upload-binaries:
@@ -81,14 +54,7 @@ jobs:
       #    name: "${{ env.artifact_name }}"
       #    path: merged-flash.bin
 
-      - run: echo "tag_name=$(date +%s)" >> $GITHUB_ENV
-          
-
-      # - uses: avakar/tag-and-release@v1
-      #   with:
-      #     tag_name: ${{ env.tag_name }}
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - run: echo "tag_name=$(git tag)" >> $GITHUB_ENV
       
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
