@@ -26,6 +26,9 @@ jobs:
 
       
       - name: ESP-IDF build
+        strategy:
+          matrix:
+            target: [esp32, esp32-S2, esp32-S3, esp32-C3]
         uses: espressif/esp-idf-ci-action@v1
         with:
           esp_idf_version: release-v4.4
