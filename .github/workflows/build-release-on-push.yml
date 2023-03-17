@@ -16,20 +16,20 @@ jobs:
           submodules: 'recursive'
 
       - name: Get Env variables
-        run: echo "TAG_NAME=v1.0" >> $GITHUB_ENV ; 
+        run: echo "TAG_NAME=v1.0" >> $GITHUB_ENV ; echo "PROJECT_NAME=$(grep -Po 'project\(\K[^)]+' CMakeLists.txt)" >> $GITHUB_ENV
 
       - name: Create config.toml
         run: |
           echo "esp_toml_version = 1.0" > config.toml
-          echo "firmware_images_url = \"${{ github.server_url }}/${{ github.repository }}/releases/tag/${{ env.TAG_NAME }}\"" >> config.toml
+          echo "firmware_images_url = \"${{ github.server_url }}/${{ github.repository }}/releases/download/${{ env.TAG_NAME }}\"" >> config.toml
           echo "supported_apps = [\"${{ github.event.repository.name }}\"]" >> config.toml
           echo "" >> config.toml
           echo "[${{ github.event.repository.name }}]" >> config.toml
           echo "chipsets = [\"ESP32\", \"ESP32-S2\", \"ESP32-S3\", \"ESP32-C3\"]" >> config.toml
-          echo "image.esp32 = \"merged-flash-esp32.bin\"" >> config.toml
-          echo "image.esp32-s2 = \"merged-flash-esp32-S2.bin\"" >> config.toml
-          echo "image.esp32-s3 = \"merged-flash-esp32-S3.bin\"" >> config.toml
-          echo "image.esp32-c3 = \"merged-flash-esp32-C3.bin\"" >> config.toml
+          echo "image.esp32 = \"${{ env.PROJECT_NAME }}-esp32.bin\"" >> config.toml
+          echo "image.esp32-s2 = \"${{ env.PROJECT_NAME }}-esp32-S2.bin\"" >> config.toml
+          echo "image.esp32-s3 = \"${{ env.PROJECT_NAME }}-esp32-S3.bin\"" >> config.toml
+          echo "image.esp32-c3 = \"${{ env.PROJECT_NAME }}-esp32-C3.bin\"" >> config.toml
           echo "android_app_url = \"\"" >> config.toml
           echo "ios_app_url = \"\"" >> config.toml
 
@@ -57,7 +57,7 @@ jobs:
       #   run: echo "${{ inputs.sdkconfig_defaults }}" >> sdkconfig.defaults
 
       - name: Get Env variables
-        run: echo "TAG_NAME=v1.0" >> $GITHUB_ENV ; 
+        run: echo "TAG_NAME=v1.0" >> $GITHUB_ENV ; echo "PROJECT_NAME=$(grep -Po 'project\(\K[^)]+' CMakeLists.txt)" >> $GITHUB_ENV
       
       - name: ESP-IDF build
         uses: espressif/esp-idf-ci-action@v1
@@ -70,7 +70,7 @@ jobs:
           command: |
             idf.py build
             cd build
-            esptool.py --chip ${{ matrix.target }} merge_bin -o merged-flash-${{ matrix.target }}.bin @flash_args
+            esptool.py --chip ${{ matrix.target }} merge_bin -o ${{ env.PROJECT_NAME }}-${{ matrix.target }}.bin @flash_args
             cd ..
 
       # - name: Find examples path
@@ -80,6 +80,6 @@ jobs:
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.MY_ACCESS_TOKEN }}
-          file: build/merged-flash-${{ matrix.target }}.bin
+          file: build/${{ env.PROJECT_NAME }}-${{ matrix.target }}.bin
           tag: ${{ env.TAG_NAME }}
           overwrite: true
