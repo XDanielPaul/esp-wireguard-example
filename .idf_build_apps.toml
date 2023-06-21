@@ -1,0 +1,8 @@
+target = "all"
+paths = "."
+recursive = false
+check_warnings = true
+config = "sdkconfig.defaults"
+
+# build related options
+build_dir = "build_@w"
