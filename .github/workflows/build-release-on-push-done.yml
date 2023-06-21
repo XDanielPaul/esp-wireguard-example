@@ -1,0 +1,26 @@
+name: "ESP-IDF build to releases (push)"
+
+on:
+    push:
+        branches:
+        - master
+
+jobs:
+
+  build-and-upload-binaries:
+    strategy:
+      matrix:
+        idf_ver: ["latest"]
+    runs-on: ubuntu-latest
+    container: espressif/idf:${{ matrix.idf_ver }}
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+        with:
+          submodules: 'recursive'
+
+      - name: Action for Building and Uploading Binaries
+        uses: XDanielPaul/build-merged-binaries-upload-ci-action@v1.6.2
+        with:
+          tag: "v1.0"
+          github_token: ${{ secrets.MY_ACCESS_TOKEN }}
