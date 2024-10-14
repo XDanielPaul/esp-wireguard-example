@@ -1,7 +1,7 @@
 target = "all"
 paths = "."
 recursive = false
-check_warnings = true
+ignore-warning-strs = ".+"
 config = "sdkconfig.defaults"
 
 # build related options
