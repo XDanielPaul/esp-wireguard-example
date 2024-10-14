@@ -1,13 +1,12 @@
 name: "ESP-IDF build to releases (push)"
 
 on:
-    push:
-        branches:
-        - master
+  push:
+    branches:
+      - master
 
 jobs:
-
-  build-and-upload-binaries:
+  build:
     strategy:
       matrix:
         idf_ver: ["latest"]
@@ -17,10 +16,43 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v3
         with:
-          submodules: 'recursive'
+          submodules: "recursive"
 
       - name: Action for Building and Uploading Binaries
-        uses: XDanielPaul/build-merged-binaries-upload-ci-action@v1.6.2
+        uses: XDanielPaul/idf-examples-launchpad-ci-action@v1
         with:
-          tag: "v1.0"
-          github_token: ${{ secrets.MY_ACCESS_TOKEN }}
+          idf_version: ${{ matrix.idf_ver }}
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: built_files
+          path: binaries/
+
+  deploy:
+    needs: build
+
+    permissions:
+      pages: write
+      id-token: write
+
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download built files
+        uses: actions/download-artifact@v3
+        with:
+          name: built_files
+          path: binaries/
+
+      - name: Upload built files to gh pages
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: binaries/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
